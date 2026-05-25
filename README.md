@@ -41,3 +41,13 @@ The first invocation will offer to add the [unpins.cachix.org](https://unpins.ca
 ## Manual download
 
 The [Releases](https://github.com/unpins/jq/releases) page has standalone binaries and a `.tar.zst` data archive (man pages and completions) for manual download.
+
+## Build notes
+
+- **Windows uses mingw.** jq is small portable C (libm + oniguruma + stdio); no `readdir`-style code path exercises msvcrt's ANSI quirks, so the mingw cross is the natural fit (no need for Cosmopolitan's polyfill weight).
+- **Embedded standard library.** jq compiles its built-in filter library (`src/builtin.jq` — `min`, `max`, `group_by`, `to_entries`, `unique_by`, `walk`, etc.) into `builtin.inc` at build time and links it into the binary. There's no companion `.jq` file to ship.
+- **mingw-specific build tweaks** (auto-applied by the flake, see comments inline):
+  - `windows.pthreads` added to `buildInputs` (jq's `#include <pthread.h>` against the mingw-w64 winpthreads split that nixpkgs's `jq.nix` doesn't list).
+  - `LDFLAGS=-all-static` to force the static `.a` over `.dll.a` so no `libwinpthread.dll` is copied next to the `.exe`.
+  - `postFixup` runs `remove-references-to` against `jq.exe` (upstream nixpkgs only does this for `jq`, not `jq.exe`).
+- No upstream features are disabled; no platforms are excluded.
