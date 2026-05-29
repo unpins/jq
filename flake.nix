@@ -12,6 +12,20 @@
     unpins-lib.lib.mkStandaloneFlake {
       inherit self;
       name = "jq";
+      # darwin: pkgsStatic.jq still builds `libjq.1.dylib` and libtool links the
+      # `jq` binary against it; `dropSharedLibs` then deletes the dylib, leaving a
+      # dangling dynamic ref the portability gate rejects. mkStandaloneFlake's
+      # filterEnableStaticOnDarwin strips `--disable-shared` from configureFlags
+      # (to stop `--enable-static` becoming `LDFLAGS=-static`), so push it back via
+      # the bash `configureFlagsArray` — invisible to the Nix-list filter — the
+      # same dodge curl/file use. Linux pkgsStatic suppresses the dylib already;
+      # the array re-add is a harmless no-op there.
+      build = pkgs:
+        pkgs.pkgsStatic.jq.overrideAttrs (old: {
+          preConfigure = (old.preConfigure or "") + ''
+            configureFlagsArray+=("--disable-shared")
+          '';
+        });
       # Three things upstream nixpkgs doesn't do for jq on mingw:
       # - winpthreads in buildInputs (mingw-w64 ships it separately; jq #includes <pthread.h>).
       # - LDFLAGS=-all-static: windows.pthreads ships .a + .dll.a; without it libtool picks
