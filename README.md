@@ -9,18 +9,18 @@ Standalone build of [jq](https://jqlang.org/).
 
 Part of the [unpins](https://unpins.org) project — native single-binary builds with no third-party runtime dependencies.
 
-## Installation
+## Usage
 
-Install with [unpin](https://github.com/unpins/unpin):
+Run the `jq` program with [unpin](https://github.com/unpins/unpin):
 
 ```bash
-unpin jq
+unpin jq '.name' data.json
 ```
 
-Or run without installing:
+To install it onto your PATH:
 
 ```bash
-unpin run jq
+unpin install jq
 ```
 
 ## Build locally
