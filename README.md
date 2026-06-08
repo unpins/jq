@@ -1,13 +1,13 @@
 # jq
 
-Standalone build of [jq](https://jqlang.org/).
+[jq](https://jqlang.org/) as a single self-contained binary, built natively for Linux, macOS, and Windows.
 
 [![CI](https://github.com/unpins/jq/actions/workflows/jq.yml/badge.svg)](https://github.com/unpins/jq/actions)
 ![Linux](https://img.shields.io/badge/Linux-✓-success?logo=linux&logoColor=white)
 ![macOS](https://img.shields.io/badge/macOS-✓-success?logo=apple&logoColor=white)
 ![Windows](https://img.shields.io/badge/Windows-✓-success?logo=windows&logoColor=white)
 
-Part of the [unpins](https://unpins.org) project — native single-binary builds with no third-party runtime dependencies.
+Part of the [unpins](https://unpins.org) catalog; install it with [`unpin`](https://github.com/unpins/unpin): `unpin install jq`.
 
 ## Usage
 
@@ -23,6 +23,10 @@ To install it onto your PATH:
 unpin install jq
 ```
 
+## Man pages
+
+`jq.1` is embedded in the binary — read with `unpin man jq`.
+
 ## Build locally
 
 ```bash
@@ -37,10 +41,6 @@ nix run github:unpins/jq
 ```
 
 The first invocation will offer to add the [unpins.cachix.org](https://unpins.cachix.org) substituter so most pulls come pre-built.
-
-## Man pages
-
-`jq.1` is embedded in the binary — read with `unpin man jq`.
 
 ## Manual download
 
