@@ -12,6 +12,13 @@
     unpins-lib.lib.mkStandaloneFlake {
       inherit self;
       name = "jq";
+
+      # Build via the unpin-llvm engine + emit a bitcode multicall module.
+      engine = "unpin-llvm";
+      multicall = {
+        programs = [{ name = "jq"; }];
+      };
+
       # darwin: pkgsStatic.jq still builds `libjq.1.dylib` and libtool links the
       # `jq` binary against it; `dropSharedLibs` then deletes the dylib, leaving a
       # dangling dynamic ref the portability gate rejects. mkStandaloneFlake's
