@@ -17,6 +17,17 @@
       engine = "unpin-llvm";
       multicall = {
         programs = [{ name = "jq"; }];
+        # jq's build bakes the literal configure command line (autoconf
+        # `$ac_configure_args` — `--prefix=/nix/store/…-jq-static-… --bindir=…`)
+        # into the binary as build provenance. It's dead data (never a runtime
+        # path lookup), but nix scans those store strings as references, so the
+        # otherwise-0-ref static binary drags jq's own out/-bin outputs — and
+        # their glibc/oniguruma closure — back in. Scrub the dead self-refs in
+        # the final engine binary (remove-references-to → eee…-placeholder) so
+        # the 0-ref invariant holds. `remove-references-to` on the base build
+        # doesn't help: the engine re-links from bitcode that still carries the
+        # string. grep et al. don't bake CONFIGURE_FLAGS, hence jq-specific.
+        removeReferences = [ "jq-static" ];
       };
 
       # darwin: pkgsStatic.jq still builds `libjq.1.dylib` and libtool links the
@@ -43,9 +54,14 @@
         cross.jq.overrideAttrs (old: {
           buildInputs = (old.buildInputs or [ ]) ++ [ cross.windows.pthreads ];
           makeFlags = (old.makeFlags or [ ]) ++ [ "LDFLAGS=-all-static" ];
+          # Scrub the dead baked store refs from jq.exe: the compiled-in
+          # configure command line carries `--prefix=$out --bindir=$bin`
+          # (plus the dev/man/doc dirs), so without $out/$bin here the .exe
+          # keeps a live ref to jq's own out/-bin outputs and their closure —
+          # the mingw mirror of the native `removeReferences = ["jq-static"]`.
           postFixup = ''
             remove-references-to \
-              -t "$dev" -t "$man" -t "$doc" \
+              -t "$out" -t "$bin" -t "$dev" -t "$man" -t "$doc" \
               "$bin/bin/jq.exe"
           '';
         });
