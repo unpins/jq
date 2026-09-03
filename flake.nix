@@ -18,6 +18,8 @@
       # Build via the unpin-llvm engine + emit a bitcode multicall module.
       engine = "unpin-llvm";
       multicall = {
+        # The `.exe` on the engine too, not the nixpkgs mingw-gcc cross.
+        windows = true;
         programs = [{ name = "jq"; }];
         # jq's build bakes the literal configure command line (autoconf
         # `$ac_configure_args` — `--prefix=/nix/store/…-jq-static-… --bindir=…`)
@@ -56,6 +58,14 @@
         cross.jq.overrideAttrs (old: {
           buildInputs = (old.buildInputs or [ ]) ++ [ cross.windows.pthreads ];
           makeFlags = (old.makeFlags or [ ]) ++ [ "LDFLAGS=-all-static" ];
+          # On WIN32 jq calls its body `umain`: `wmain` widens argv to UTF-8 and
+          # hands off to it, and -municode keeps `wmain` the real entry. Nothing
+          # is then named `main`, which is the symbol an applet entry binds to.
+          # Renaming the body restores that name and changes no behaviour —
+          # `wmain` still runs first and still does the conversion.
+          postPatch = (old.postPatch or "") + ''
+            sed -i 's/\bumain\b/main/g' src/main.c
+          '';
           # Scrub the dead baked store refs from jq.exe: the compiled-in
           # configure command line carries `--prefix=$out --bindir=$bin`
           # (plus the dev/man/doc dirs), so without $out/$bin here the .exe
