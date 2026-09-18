@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Updated to jq 1.8.2.
 - The Windows binary is now built by the same compiler as the Linux and macOS
   ones (1.03 MB to 1.02 MB). Checked on Windows 10: `--version`, `jq -n '1+1'`,
   and an accented argument comes back through unchanged.
