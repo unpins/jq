@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.8.2-1] - 2026-09-26
+
 ### Changed
 
 - Updated to jq 1.8.2.
