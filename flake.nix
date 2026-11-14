@@ -26,11 +26,12 @@
         # into the binary as build provenance. It's dead data (never a runtime
         # path lookup), but nix scans those store strings as references, so the
         # otherwise-0-ref static binary drags jq's own out/-bin outputs — and
-        # their glibc/oniguruma closure — back in. Scrub the dead self-refs in
-        # the final engine binary (remove-references-to → eee…-placeholder) so
-        # the 0-ref invariant holds. `remove-references-to` on the base build
-        # doesn't help: the engine re-links from bitcode that still carries the
-        # string. grep et al. don't bake CONFIGURE_FLAGS, hence jq-specific.
+        # their glibc/oniguruma closure — back in. The scrub (remove-references-to
+        # → eee…-placeholder) runs in the final wrap of the delivered binary, so
+        # the 0-ref invariant holds; jq has one program, so nothing re-links it
+        # here. Scrubbing only the base build isn't enough in a catalog mega: its
+        # re-link starts from the bitcode, which still carries the string.
+        # grep et al. don't bake CONFIGURE_FLAGS, hence jq-specific.
         removeReferences = [ "jq-static" ];
       };
 
