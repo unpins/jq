@@ -25,19 +25,19 @@ unpin install jq
 
 ## Man pages
 
-`jq.1` is embedded in the binary — read with `unpin man jq`.
+`jq.1` is embedded in the binary — read it with `unpin man jq`.
 
 ## Build locally
 
 ```bash
 nix build github:unpins/jq
-./result/bin/jq
+./result/bin/jq --version
 ```
 
 Or run directly:
 
 ```bash
-nix run github:unpins/jq
+nix run github:unpins/jq -- --version
 ```
 
 The first invocation will offer to add the [unpins.cachix.org](https://unpins.cachix.org) substituter so most pulls come pre-built.
@@ -50,4 +50,4 @@ The [Releases](https://github.com/unpins/jq/releases) page has standalone binari
 
 - **Windows** uses mingw.
 - **Embedded standard library.** jq compiles its built-in filter library (`src/builtin.jq` — `min`, `max`, `group_by`, `to_entries`, `unique_by`, `walk`, etc.) into `builtin.inc` at build time and links it into the binary. There's no companion `.jq` file to ship.
-- No upstream features are disabled; no platforms are excluded.
+- **Tests:** jq's upstream `make check` runs on native builds (0 failures under static-musl) and is skipped on cross targets the build host can't execute.
