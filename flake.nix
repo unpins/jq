@@ -58,14 +58,8 @@
         cross.jq.overrideAttrs (old: {
           buildInputs = (old.buildInputs or [ ]) ++ [ cross.windows.pthreads ];
           makeFlags = (old.makeFlags or [ ]) ++ [ "LDFLAGS=-all-static" ];
-          # On WIN32 jq calls its body `umain`: `wmain` widens argv to UTF-8 and
-          # hands off to it, and -municode keeps `wmain` the real entry. Nothing
-          # is then named `main`, which is the symbol an applet entry binds to.
-          # Renaming the body restores that name and changes no behaviour —
-          # `wmain` still runs first and still does the conversion.
-          postPatch = (old.postPatch or "") + ''
-            sed -i 's/\bumain\b/main/g' src/main.c
-          '';
+          # WIN32 names jq's body `umain`, not the `main` an applet entry binds to.
+          patches = (old.patches or [ ]) ++ [ ./patches/mingw-umain-to-main.patch ];
           # Scrub the dead baked store refs from jq.exe: the compiled-in
           # configure command line carries `--prefix=$out --bindir=$bin`
           # (plus the dev/man/doc dirs), so without $out/$bin here the .exe
